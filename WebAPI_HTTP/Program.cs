@@ -16,6 +16,7 @@ namespace WebAPI_HTTP
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddLogging(configure => configure.AddConsole());
 
             builder.Services.AddDbContext<AddAppContext>(options =>
              options.UseSqlServer("Server=OGN-LT31\\MSSQLSERVER03;Database=master;Trusted_Connection=True;TrustServerCertificate=Yes"));

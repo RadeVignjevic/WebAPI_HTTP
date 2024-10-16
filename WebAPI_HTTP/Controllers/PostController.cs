@@ -27,33 +27,35 @@ namespace WebAPI_HTTP.Controllers
             {
                 ApiService _apiService = new ApiService();
 
-                List<DboUser> dboUser = await  _addAppContext.DboUser.ToListAsync();
-                 
+                List<DboUser> dboUser = await _addAppContext.DboUser.ToListAsync();
+
                 var posts = await _apiService.GetPostsAsync();
 
                 Parallel.ForEach(dboUser, user =>
                 {
                     using (var context = new AddAppContext())
                     {
+                        var transactionContext = context.Database.BeginTransaction();
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.DboPost ON");
                         foreach (var post in posts)
                         {
-                            if(post.UserId == user.UserId)
+                            if (post.UserId == user.UserId)
                             {
                                 DboPost dboPost = new DboPost
                                 {
+                                    PostId = post.Id,
                                     Body = post.Body,
                                     Title = post.Title,
                                     UserId = user.UserId
                                 };
-
                                 context.DboPost.Add(dboPost);
                             }
                         }
-                        context.SaveChanges();  
+                        context.SaveChanges();
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.DboPost OFF");
+                        transactionContext.Commit();
                     }
                 });
-
-
             }
             catch (Exception ex)
             {
